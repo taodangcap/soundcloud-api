@@ -1,0 +1,27 @@
+# Cloudflare Workers configuration
+# See https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "soundcloud-proxy-server"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Environment variables (optional - can also use secrets)
+# [vars]
+# SOUNDCLOUD_CLIENT_ID = "your_client_id_here"
+
+# Routes - uncomment and configure if you have a custom domain
+# routes = [
+#   { pattern = "soundcloud-proxy.yourdomain.com", zone_name = "yourdomain.com" }
+# ]
+
+# Uncomment to use a custom domain
+# [env.production]
+# name = "soundcloud-proxy-server"
+# routes = [
+#   { pattern = "soundcloud-proxy.yourdomain.com", zone_name = "yourdomain.com" }
+# ]
+
+# Uncomment for development environment
+# [env.development]
+# name = "soundcloud-proxy-server-dev"
+
