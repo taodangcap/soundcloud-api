@@ -2,7 +2,7 @@
 # See https://developers.cloudflare.com/workers/wrangler/configuration/
 
 name = "soundcloud-proxy-server"
-main = "src/index.js"
+main = "index.js"
 compatibility_date = "2024-01-01"
 
 # Environment variables (optional - can also use secrets)
@@ -24,4 +24,5 @@ compatibility_date = "2024-01-01"
 # Uncomment for development environment
 # [env.development]
 # name = "soundcloud-proxy-server-dev"
+
 
