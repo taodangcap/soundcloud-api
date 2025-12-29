@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "echo 'No build step needed for Cloudflare Workers'",
+    "build": "node -e \"const fs=require('fs'); if(!fs.existsSync('src/index.js')) { console.error('ERROR: src/index.js not found!'); process.exit(1); } console.log('✓ src/index.js found');\"",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "tail": "wrangler tail"
