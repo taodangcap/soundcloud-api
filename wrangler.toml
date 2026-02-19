@@ -5,9 +5,10 @@ name = "soundcloud-proxy-server"
 main = "index.js"
 compatibility_date = "2024-01-01"
 
-# Environment variables (optional - can also use secrets)
-# [vars]
+# Environment variables
+[vars]
 # SOUNDCLOUD_CLIENT_ID = "your_client_id_here"
+ALLOWED_ORIGIN = "http://trinhquanghuy.net, https://huy.sale"
 
 # Routes - uncomment and configure if you have a custom domain
 # routes = [

@@ -16,18 +16,20 @@ const CONFIG = {
   }
 }
 
-// CORS headers helper
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-}
+// Kiểm tra và lấy Headers CORS dựa trên Origin của request
+function getCorsHeaders(request, env) {
+  const origin = request.headers.get('Origin');
+  const allowedOrigins = (env.ALLOWED_ORIGIN || '').split(',').map(o => o.trim());
 
-// Handle OPTIONS request for CORS preflight
-function handleOptions() {
-  return new Response(null, {
-    headers: corsHeaders,
-  })
+  // Nếu Origin nằm trong danh sách cho phép, hoặc danh sách có dấu '*'
+  const isAllowed = allowedOrigins.includes(origin) || allowedOrigins.includes('*');
+  const responseOrigin = isAllowed ? origin : (allowedOrigins[0] || '*');
+
+  return {
+    'Access-Control-Allow-Origin': responseOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
 }
 
 // Transform SoundCloud track data
@@ -50,21 +52,31 @@ function transformTrack(track) {
 // Main handler
 export default {
   async fetch(request, env) {
+    const corsHeaders = getCorsHeaders(request, env);
+
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
-      return handleOptions()
+      return new Response(null, { headers: corsHeaders })
+    }
+
+    // Kiểm tra bảo mật: Nếu request có Origin nhưng không nằm trong whitelist thì chặn
+    const origin = request.headers.get('Origin');
+    const allowedOrigins = (env.ALLOWED_ORIGIN || '').split(',').map(o => o.trim());
+    if (origin && !allowedOrigins.includes(origin) && !allowedOrigins.includes('*')) {
+      return new Response('Access Denied: Origin not allowed', { status: 403, headers: corsHeaders });
     }
 
     const url = new URL(request.url)
     const path = url.pathname
 
-    // Health check endpoint
-    if (path === '/health') {
+    // Health check endpoint (Cho phép cả root / để báo Online)
+    if (path === '/' || path === '/health' || path === '/api/health') {
       return new Response(
-        JSON.stringify({ 
-          status: 'ok', 
+        JSON.stringify({
+          status: 'ok',
           service: CONFIG.server.name,
-          version: CONFIG.server.version 
+          version: CONFIG.server.version,
+          timestamp: new Date().toISOString()
         }),
         {
           headers: {
@@ -101,8 +113,8 @@ export default {
 
         if (!clientId) {
           return new Response(
-            JSON.stringify({ 
-              error: 'Client ID is required. Set SOUNDCLOUD_CLIENT_ID secret or pass it as query parameter' 
+            JSON.stringify({
+              error: 'Client ID is required. Set SOUNDCLOUD_CLIENT_ID secret or pass it as query parameter'
             }),
             {
               status: 400,
@@ -149,7 +161,7 @@ export default {
         }
 
         const data = await response.json()
-        
+
         // Transform the data
         const tracks = (data.collection || []).map(transformTrack)
 
